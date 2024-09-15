@@ -32,6 +32,7 @@ class Weather {
 
 // TODO: Complete the WeatherService class
 class WeatherService {
+  cityName: string;
   private async fetchLocationData(query: string): Promise<any> {
     const response = await fetch(`${this.baseURL}/geo/1.0/direct?q=${query}&limit=1&appid=${this.apiKey}`);
     if (!response.ok) {
@@ -48,9 +49,7 @@ class WeatherService {
     return { latitude: lat, longitude: lon };
   }
 
-  private buildGeocodeQuery(cityName: string): string {
-    return `${this.baseURL}/geo/1.0/direct?q=${cityName}&limit=1&appid=${this.apiKey}`;
-  }
+
 
   private buildWeatherQuery(coordinates: Coordinates): string {
     return `${this.baseURL}/data/2.5/weather?lat=${coordinates.latitude}&lon=${coordinates.longitude}&appid=${this.apiKey}&units=metric`;
@@ -80,7 +79,7 @@ class WeatherService {
     );
   }
 
-  private buildForecastArray(currentWeather: Weather, weatherData: any[]): Weather[] {
+  private buildForecastArray(_currentWeather: Weather, weatherData: any[]): Weather[] {
     return weatherData.map((data: any) => {
       const { main, wind, weather } = data;
       return new Weather(
@@ -97,19 +96,21 @@ class WeatherService {
     this.cityName = city;
     const coordinates = await this.fetchAndDestructureLocationData(city);
     const weatherData = await this.fetchWeatherData(coordinates);
-    return this.parseCurrentWeather(weatherData);
+    const currentWeather = this.parseCurrentWeather(weatherData);
+    this.buildForecastArray(currentWeather, [weatherData]); // Example usage
+    return currentWeather;
   }
   getWeatherData // private async fetchWeatherData(coordinates: Coordinates) {}
     () {
     throw new Error('Method not implemented.');
   }
-  getWeatherByCityName(cityName: any) {
+  getWeatherByCityName(_cityName: any) {
     throw new Error('Method not implemented.');
   }
   // TODO: Define the baseURL, API key, and city name properties
   private baseURL: string;
   private apiKey: string;
-  private cityName: string;
+  // private cityName: string;
 
   constructor() {
     this.baseURL = process.env.WEATHER_API_BASE_URL || '';
